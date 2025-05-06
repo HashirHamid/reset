@@ -11,36 +11,35 @@ export class ResetComponent implements OnInit {
   newPassword: string = '';
   confirmPassword: string = '';
   statusMessage: string = '';
-  code: string | null = null;
 
   constructor() {
-    this.supabase = createClient('https://xuappslnruqekgevplor.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1YXBwc2xucnVxZWtnZXZwbG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyOTgyNTQsImV4cCI6MjA1OTg3NDI1NH0.fDOlkzlwAg9VhpzCzDqwJN7i5dWNnQOkRfPodyhmFgg');
+    this.supabase = createClient(
+      'https://xuappslnruqekgevplor.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1YXBwc2xucnVxZWtnZXZwbG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyOTgyNTQsImV4cCI6MjA1OTg3NDI1NH0.fDOlkzlwAg9VhpzCzDqwJN7i5dWNnQOkRfPodyhmFgg'
+    );
   }
 
-  async ngOnInit() {
-    const params = new URLSearchParams(window.location.search);
-    this.code = params.get('code');
-
-    if (this.code) {
-      const { error } = await this.supabase.auth.exchangeCodeForSession(this.code);
-      if (error) {
-        this.statusMessage = 'Session exchange failed: ' + error.message;
+  ngOnInit(): void {
+    // No need to manually call exchangeCodeForSession anymore
+    this.supabase.auth.getSession().then(({ data, error }) => {
+      if (!data?.session) {
+        this.statusMessage = 'Not logged in. Please use the reset link from your email again.';
       }
-    }
+    });
   }
 
   async resetPassword() {
     if (this.newPassword !== this.confirmPassword) {
-      this.statusMessage = "Passwords do not match";
+      this.statusMessage = 'Passwords do not match';
       return;
     }
 
-    const { data, error } = await this.supabase.auth.updateUser({ password: this.newPassword });
+    const { error } = await this.supabase.auth.updateUser({
+      password: this.newPassword
+    });
 
-    if (error) {
-      this.statusMessage = "Error: " + error.message;
-    } else {
-      this.statusMessage = "Password updated successfully!";
-    }
+    this.statusMessage = error
+      ? 'Error: ' + error.message
+      : 'Password updated successfully!';
   }
 }
