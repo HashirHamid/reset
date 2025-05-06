@@ -1,0 +1,7 @@
+<div class="reset-container">
+    <h2>Reset Your Password</h2>
+    <input type="password" placeholder="New Password" [(ngModel)]="newPassword" />
+    <input type="password" placeholder="Confirm Password" [(ngModel)]="confirmPassword" />
+    <button (click)="resetPassword()">Update Password</button>
+    <p>{{ statusMessage }}</p>
+</div>
